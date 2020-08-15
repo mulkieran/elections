@@ -106,31 +106,35 @@ def election(draw):
 from hypothesis import example
 
 
-def main():
+def plurality_v_rcv():
     """
-    Select a set of votes such that the winner by the plurality system is
-    different from the winner by the ranked choice voting system.
+    Return an election example where plurality voting yields a different
+    winner than RCV voting.
 
     Assume that in plurality voting, a voter always casts their one vote for
     their first choice, i.e., there are no "strategic" voting choices such
     that the voter votes for a candidate who might win, rather than their
     actual preferred candidate.
+
+    :returns: a tuple of the election, the plurality winner, and the rcv winner
+    :rtype: election * int * int
     """
-    (plurality_winner, rcv_winner, votes, preferred) = (
+    return (
         election()
-        .map(lambda election: (plurality(election), rcv(election), election))
+        .map(lambda election: (election, plurality(election), rcv(election)))
         .filter(
-            lambda res: res[0] is not None and res[1] is not None and res[0] != res[1]
+            lambda res: res[1] is not None and res[2] is not None and res[1] != res[2]
         )
-        .map(
-            lambda vals: (
-                vals[0],
-                vals[1],
-                vals[2],
-                majority_preferences(vals[2], vals[0], vals[1]),
-            )
-        )
-    ).example()
+        .example()
+    )
+
+
+def main():
+    """
+    Select a set of votes such that the winner by the plurality system is
+    different from the winner by the ranked choice voting system.
+    """
+    (votes, plurality_winner, rcv_winner) = plurality_v_rcv()
 
     print("Plurality winner: %s" % plurality_winner)
     print("RCV winner: %s" % rcv_winner)
@@ -139,6 +143,8 @@ def main():
     for vote in votes:
         print(vote)
     print()
+
+    preferred = majority_preferences(votes, plurality_winner, rcv_winner)
 
     print("Relative preference:")
     for (candidate, count) in preferred.items():
