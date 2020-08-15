@@ -136,10 +136,12 @@ def main():
     """
     (votes, plurality_winner, rcv_winner) = plurality_v_rcv()
 
+    num_voters = len(votes)
+
     print("Plurality winner: %s" % plurality_winner)
     print("RCV winner: %s" % rcv_winner)
     print()
-    print("Votes (%s):" % len(votes))
+    print("Votes (%s):" % num_voters)
     for vote in votes:
         print(vote)
     print()
@@ -149,6 +151,12 @@ def main():
     print("Relative preference:")
     for (candidate, count) in preferred.items():
         print("%s voters preferred %s" % (count, candidate))
+    print()
+
+    vote_categories = Counter(tuple(x) for x in votes)
+    print("Overall choice count:")
+    for (cat, count) in vote_categories.items():
+        print("%s out of %s voted %s" % (count, num_voters, cat))
 
 
 if __name__ == "__main__":
